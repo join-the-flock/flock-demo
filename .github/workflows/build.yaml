@@ -1,6 +1,7 @@
 on:
   schedule:
     - cron: '0 13 * * *' # Once per day at 1pm
+  pull_request:
   workflow_dispatch: # on button click
 
 name: Build App
@@ -19,6 +20,12 @@ jobs:
 
       - name: Install FVM
         run: dart pub global activate fvm
+
+      - name: Install Flock with FVM
+        run: fvm install
+
+      - name: List FVM installs
+        run: fvm list
 
       - name: Download app dependencies using FVM
         run: fvm flutter pub get
