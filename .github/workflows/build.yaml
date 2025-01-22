@@ -1,0 +1,27 @@
+on:
+  schedule:
+    - cron: '0 13 * * *' # Once per day at 1pm
+  workflow_dispatch: # on button click
+
+name: Build App
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+
+      - name: Set up Dart environment
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install FVM
+        run: dart pub global activate fvm
+
+      - name: Download app dependencies using FVM
+        run: fvm flutter pub get
+
+
+
