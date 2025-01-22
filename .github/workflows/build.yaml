@@ -24,9 +24,6 @@ jobs:
       - name: Flock Version
         run: fvm flutter --version
 
-      - name: Install Flock with FVM
-        run: fvm install
-
       - name: List FVM installs
         run: fvm list
 
