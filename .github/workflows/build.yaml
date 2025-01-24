@@ -27,6 +27,9 @@ jobs:
       - name: Download app dependencies using FVM
         run: fvm flutter pub get
 
+      - name: Do sanity check build
+        run: fvm flutter build web
+
   build-app_beta:
     runs-on: ubuntu-latest
     steps:
@@ -49,6 +52,9 @@ jobs:
       - name: Download app dependencies using FVM
         run: fvm flutter pub get
 
+      - name: Do sanity check build
+        run: fvm flutter build web
+
   build-app_stable:
     runs-on: ubuntu-latest
     steps:
@@ -70,3 +76,6 @@ jobs:
 
       - name: Download app dependencies using FVM
         run: fvm flutter pub get
+
+      - name: Do sanity check build
+        run: fvm flutter build web
