@@ -47,7 +47,7 @@ jobs:
         run: dart pub global activate fvm
 
       - name: Install Flock with FVM
-        run: fvm install
+        run: fvm install --verbose
 
       - name: Download app dependencies using FVM
         run: fvm flutter pub get
@@ -72,7 +72,7 @@ jobs:
         run: dart pub global activate fvm
 
       - name: Install Flock with FVM
-        run: fvm install
+        run: fvm install --verbose
 
       - name: Download app dependencies using FVM
         run: fvm flutter pub get
