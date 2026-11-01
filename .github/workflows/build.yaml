@@ -1,19 +1,33 @@
-on:
-  schedule:
-    - cron: '0 13 * * *' # Once per day at 1pm (after Flock rebase)
-  pull_request:
-  workflow_dispatch: # on button click
-
 name: Build App
 
-jobs:
-  build-app_master:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v3
+on:
+  schedule:
+    - cron: '0 13 * * *' # Once per day at 13:00 UTC, after Flock rebase
+  pull_request:
+    branches: [master, beta, stable]
+  push:
+    branches: [master, beta, stable]
+  workflow_dispatch:
 
-      - name: Set up Dart environment
+permissions:
+  contents: read
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        channel: [master, beta, stable]
+    steps:
+      - name: Check out the matching demo branch
+        uses: actions/checkout@v4
+        with:
+          # Test proposed changes for their target channel, and the published
+          # demo branches for the other channels.
+          ref: ${{ github.event_name == 'pull_request' && github.base_ref == matrix.channel && github.ref || matrix.channel }}
+
+      - name: Set up Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
@@ -21,61 +35,20 @@ jobs:
       - name: Install FVM
         run: dart pub global activate fvm
 
-      - name: Install Flock with FVM
+      - name: Install the published Flock channel
         run: fvm install --verbose
 
-      - name: Download app dependencies using FVM
+      - name: Check Flock version
+        run: fvm flutter --version
+
+      - name: Resolve demo dependencies
         run: fvm flutter pub get
 
-      - name: Do sanity check build
-        run: fvm flutter build web
+      - name: Analyze demo
+        run: fvm flutter analyze --no-pub
 
-  build-app_beta:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v3
-        with:
-          ref: beta
+      - name: Test demo
+        run: fvm flutter test --no-pub
 
-      - name: Set up Dart environment
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-
-      - name: Install FVM
-        run: dart pub global activate fvm
-
-      - name: Install Flock with FVM
-        run: fvm install
-
-      - name: Download app dependencies using FVM
-        run: fvm flutter pub get
-
-      - name: Do sanity check build
-        run: fvm flutter build web
-
-  build-app_stable:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v3
-        with:
-          ref: stable
-
-      - name: Set up Dart environment
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-
-      - name: Install FVM
-        run: dart pub global activate fvm
-
-      - name: Install Flock with FVM
-        run: fvm install
-
-      - name: Download app dependencies using FVM
-        run: fvm flutter pub get
-
-      - name: Do sanity check build
-        run: fvm flutter build web
+      - name: Build demo for web
+        run: fvm flutter build web --release --no-pub
